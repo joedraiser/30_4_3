@@ -3,36 +3,45 @@
 
 int main()
 {
-    std::string URL="http://httpbin.org", URL_args="", input[2];
+    cpr::Pair pair={"",""};
+    std::vector<cpr::Pair> pairs;
+
+    std::string URL="http://httpbin.org";
 
     while(true)
     {
         std::cout << "Input args and their value or type 'post' or 'get' to set corresponding request: ";
-        std::cin >> input[0];
+        std::cin >> pair.key;
 
-        if(input[0]=="get"||input[0]=="post")
+        if(pair.key=="get"||pair.key=="post")
             break;
 
-        std::cin >> input[1];
+        std::cin >> pair.value;
 
-        if(URL_args.size()==0)
-            URL_args='?'+input[0]+'='+input[1];
-        else
-            URL_args=URL_args+'&'+input[0]+'='+input[1];
+        pairs.push_back(pair);
     }
 
     cpr::Response r;
 
-    if(input[0]=="get")
+
+    if(pair.key=="get")
     {
-        URL = URL + "/get" + URL_args;
+        URL=URL+"/get";
+        if(!pairs.empty())
+        {
+            URL+='?';
+            for(auto it=pairs.begin();it!=pairs.end();it++)
+            {
+                URL+=it->key+'='+it->value+'&';
+            }
+        }
         r = cpr::Get(cpr::Url(URL.c_str()));
         std::cout << r.text;
     }
-    else if(input[0]=="post")
+    else if(pair.key=="post")
     {
-        URL = URL + "/post" + URL_args;
-        r = cpr::Post(cpr::Url(URL.c_str()));
+        URL=URL+"/post";
+        r = cpr::Post(cpr::Url(URL.c_str()), cpr::Payload(pairs.begin(), pairs.end()));
         std::cout << r.text;
     }
 
